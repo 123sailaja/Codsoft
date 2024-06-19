@@ -1,0 +1,31 @@
+def chatbot():
+    print("Hello! I'm a simple chatbot. How can I assist you today?")
+    
+    while True:
+        user_input = input("You: ").lower()
+        
+        # Greetings
+        if any(greeting in user_input for greeting in ["hi", "hello", "hey"]):
+            print("Chatbot: Hello! How can I help you today?")
+        
+        # Asking for weather
+        elif "weather" in user_input:
+            print("Chatbot: Unfortunately, I don't have access to real-time weather information. I'm a simple chatbot without that capability.")
+        
+        # Asking for time
+        elif "time" in user_input:
+            import datetime
+            current_time = datetime.datetime.now().strftime("%I:%M %p")
+            print(f"Chatbot: The current time is {current_time}.")
+        
+        # Saying goodbye
+        elif any(farewell in user_input for farewell in ["bye", "goodbye", "see you"]):
+            print("Chatbot: Goodbye! Have a great day.")
+            break
+        
+        # Unknown input
+        else:
+            print("Chatbot: I'm sorry, I didn't understand that. Could you please rephrase?")
+
+# Start the chatbot
+chatbot()
