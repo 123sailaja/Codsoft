@@ -1,0 +1,40 @@
+from transformers import GPT2TokenizerFast, ViTImageProcessor, VisionEncoderDecoderModel
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Load the pretrained model, processor, and tokenizer
+model_raw = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+image_processor = ViTImageProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+tokenizer = GPT2TokenizerFast.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+
+def show_n_generate(image_path, greedy=True, model=model_raw):
+    try:
+        # Open the image file
+        image = Image.open(image_path)
+        
+        # Preprocess the image
+        pixel_values = image_processor(images=image, return_tensors="pt").pixel_values
+        
+        # Generate captions
+        if greedy:
+            generated_ids = model.generate(pixel_values, max_length=30)
+        else:
+            generated_ids = model.generate(pixel_values, do_sample=True, max_length=30, top_k=5)
+        
+        # Decode the generated text
+        generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+        print("Generated Caption:", generated_text)
+        
+        # Display the image
+        plt.imshow(image)
+        plt.axis('off')
+        plt.show()
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Provide the path to your image
+image_path = "example.jpg"  # Change this to the path of your image
+
+# Generate and display caption
+show_n_generate(image_path, greedy=False)

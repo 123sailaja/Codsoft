@@ -1,0 +1,60 @@
+ ## pip install scikit-surprise
+
+import pandas as pd
+from surprise import Dataset, Reader
+from surprise import SVD
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Sample dataset (replace with your own dataset)
+data = {
+    'user': ['User1', 'User1', 'User1', 'User2', 'User2', 'User3'],
+    'item': ['Movie A', 'Movie B', 'Movie C', 'Movie A', 'Movie D', 'Movie B'],
+    'rating': [5, 4, 3, 5, 2, 4]
+}
+
+# Load data into a DataFrame
+df = pd.DataFrame(data)
+
+# Define the Reader object
+reader = Reader(rating_scale=(1, 5))
+
+# Load the dataset from the DataFrame
+dataset = Dataset.load_from_df(df[['user', 'item', 'rating']], reader)
+
+# Split the dataset into training and testing sets
+trainset, testset = train_test_split(dataset, test_size=0.2)
+
+# Use the SVD algorithm for training
+algo = SVD()
+algo.fit(trainset)
+
+# Test the algorithm on the testset
+predictions = algo.test(testset)
+
+# Compute and print RMSE (Root Mean Squared Error)
+rmse = accuracy.rmse(predictions)
+print(f'RMSE: {rmse}')
+
+# Recommend items for a specific user
+user_id = 'User1'
+
+# Get all unique items
+all_items = df['item'].unique()
+
+# Predict ratings for items not rated by the user
+user_ratings = {}
+for item in all_items:
+    # Check if the user has already rated the item
+    if df[(df['user'] == user_id) & (df['item'] == item)].empty:
+        prediction = algo.predict(user_id, item)
+        user_ratings[item] = prediction.est
+
+# Get top 3 recommended items
+recommended_items = sorted(user_ratings.items(), key=lambda x: x[1], reverse=True)[:3]
+
+# Print recommended items
+print(f'Recommended items for {user_id}:')
+for item, rating in recommended_items:
+    print(f'{item} (predicted rating: {rating})')
+
